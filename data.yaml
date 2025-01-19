@@ -1,0 +1,4 @@
+train: path/to/dataset/train/images
+val: path/to/dataset/val/images
+nc: 1 # Number of classes
+names: ["airglow"] # Class names

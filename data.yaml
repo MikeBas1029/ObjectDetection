@@ -1,4 +1,4 @@
 train: path/to/dataset/train/images
 val: path/to/dataset/val/images
-nc: 2 # Number of classes
-names: ["airglow", "moon"] # Class names
+nc: 3 # Number of classes
+names: ["airglow", "moon", "star"] # Class names

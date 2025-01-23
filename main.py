@@ -5,7 +5,7 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+# cmd for boxes labelImg dataset/train/converted_images (must in each folder have classes.txt)
 def data_loader(input_dir, output_dir):
     """
     Converts FITS files in the input directory to PNG files in the output directory.
@@ -49,39 +49,35 @@ val_png_path = os.path.join(project_root, "dataset/val/converted_images")
 val_labels_path = os.path.join(project_root, "dataset/val/labels")
 
 # Convert FITS files to PNG for both training and validation datasets
-data_loader(train_fits_path, train_png_path)
-data_loader(val_fits_path, val_png_path)
+#data_loader(train_fits_path, train_png_path)
+#data_loader(val_fits_path, val_png_path)
 
 # Load a YOLOv8 model
 model = YOLO('yolov8n.pt')  # Replace 'n' with 's', 'm', 'l', or 'x' for larger models
 
 # Train the model
-model.train(data='data.yaml', epochs=20, imgsz=640, pretrained=True)
+model.train(data='data.yaml', epochs=20, imgsz=640, batch=16)
 
 # Load the trained model
-model = YOLO('runs/detect/train/weights/best.pt')
+model = YOLO('runs/detect/train6/weights/best.pt')
 
 # Predict on a new image
-results = model.predict(source='dataset/train/converted_images/PKR_DASC_0428_20160217_150009.877.png', save=True)
-
-# Print prediction details
-print("Bounding Boxes:", results[0].boxes.xyxy)  # Coordinates
-print("Confidence Scores:", results[0].boxes.conf)  # Confidence
-print("Class IDs:", results[0].boxes.cls)  # Predicted classes
+results = model.predict(source='dataset/train/converted_images/PKR_DASC_0428_20160217_143735.846.png', save=True)
 
 # Load an image
-img = cv2.imread('dataset/train/converted_images/PKR_DASC_0428_20160217_150009.877.png')
+img = cv2.imread('dataset/train/converted_images/PKR_DASC_0428_20160217_143735.846.png')
 
 # Iterate through YOLO results
-if len(results[0].boxes) > 0:  # Check if boxes are detected
-    for box in results[0].boxes.xyxy:
-        x1, y1, x2, y2 = map(int, box)  # Extract coordinates
-        # Draw the box
-        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        print(f"Bounding box drawn at: {x1, y1, x2, y2}")
-else:
-    print("No detections made.")
+for box in results[0].boxes.xyxy:
+    x1, y1, x2, y2 = map(int, box.xyxy[0])  # Extract coordinates
+    print(f"Box coordinates: {x1}, {y1}, {x2}, {y2}")
+    side = max(x2 - x1, y2 - y1)  # Find the longer side
+    center_x, center_y = (x1 + x2) // 2, (y1 + y2) // 2
+    x1, y1 = center_x - side // 2, center_y - side // 2
+    x2, y2 = center_x + side // 2, center_y + side // 2
 
+    # Draw a square
+    cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
 # Save or display the image
 cv2.imwrite('output.jpg', img)

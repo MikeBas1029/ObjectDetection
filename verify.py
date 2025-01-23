@@ -1,11 +1,23 @@
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import os
 
-# Get the root directory of the project
-project_root = os.path.dirname(os.path.abspath(__file__))
+def visualize_annotations(image_path, label_path):
+    img = plt.imread(image_path)
+    fig, ax = plt.subplots(1)
+    ax.imshow(img)
 
-# Define dataset paths relative to the project root
-train_images_path = os.path.join(project_root, "dataset/train/images")
-val_images_path = os.path.join(project_root, "dataset/val/images")
+    # Read label file
+    with open(label_path, "r") as f:
+        for line in f.readlines():
+            cls, x, y, w, h = map(float, line.split())
+            x_min = (x - w / 2) * img.shape[1]
+            y_min = (y - h / 2) * img.shape[0]
+            width = w * img.shape[1]
+            height = h * img.shape[0]
+            rect = patches.Rectangle((x_min, y_min), width, height, linewidth=1, edgecolor="r", facecolor="none")
+            ax.add_patch(rect)
 
-print("Train images path:", train_images_path)
-print("Validation images path:", val_images_path)
+    plt.show()
+
+visualize_annotations("dataset/train/converted_images/PKR_DASC_0428_20160217_143735.846.png", "dataset/train/converted_images/PKR_DASC_0428_20160217_143735.846.txt")

@@ -56,27 +56,32 @@ data_loader(val_fits_path, val_png_path)
 model = YOLO('yolov8n.pt')  # Replace 'n' with 's', 'm', 'l', or 'x' for larger models
 
 # Train the model
-model.train(data='data.yaml', epochs=10, imgsz=640, batch=16)
+model.train(data='data.yaml', epochs=20, imgsz=640, pretrained=True)
 
 # Load the trained model
 model = YOLO('runs/detect/train/weights/best.pt')
 
 # Predict on a new image
-results = model.predict(source='dataset/train/converted_images/PKR_DASC_0428_20160217_143735.846.png', save=True)
+results = model.predict(source='dataset/train/converted_images/PKR_DASC_0428_20160217_150009.877.png', save=True)
+
+# Print prediction details
+print("Bounding Boxes:", results[0].boxes.xyxy)  # Coordinates
+print("Confidence Scores:", results[0].boxes.conf)  # Confidence
+print("Class IDs:", results[0].boxes.cls)  # Predicted classes
 
 # Load an image
-img = cv2.imread('dataset/train/converted_images/PKR_DASC_0428_20160217_143735.846.png')
+img = cv2.imread('dataset/train/converted_images/PKR_DASC_0428_20160217_150009.877.png')
 
 # Iterate through YOLO results
-for box in results[0].boxes.xyxy:
-    x1, y1, x2, y2 = map(int, box)  # Extract coordinates
-    side = max(x2 - x1, y2 - y1)  # Find the longer side
-    center_x, center_y = (x1 + x2) // 2, (y1 + y2) // 2
-    x1, y1 = center_x - side // 2, center_y - side // 2
-    x2, y2 = center_x + side // 2, center_y + side // 2
+if len(results[0].boxes) > 0:  # Check if boxes are detected
+    for box in results[0].boxes.xyxy:
+        x1, y1, x2, y2 = map(int, box)  # Extract coordinates
+        # Draw the box
+        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        print(f"Bounding box drawn at: {x1, y1, x2, y2}")
+else:
+    print("No detections made.")
 
-    # Draw a square
-    cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
 # Save or display the image
 cv2.imwrite('output.jpg', img)

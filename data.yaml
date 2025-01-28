@@ -1,5 +1,5 @@
 train: C:/Users/gurpr/OneDrive/Documents/GP/Coding Projects/YOLOv8/dataset/train/converted_images
 val: C:/Users/gurpr/OneDrive/Documents/GP/Coding Projects/YOLOv8/dataset/val/converted_images
 
-nc: 3
-names: ["airglow", "moon", "star"]
+nc: 5
+names: ["airglow", "moon", "star", "clear_sky", "noise"]

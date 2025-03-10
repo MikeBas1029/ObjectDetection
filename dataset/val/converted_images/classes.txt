@@ -1,5 +1,2 @@
 airglow
-moon
-star
-clear_sky
-noise
+artifact

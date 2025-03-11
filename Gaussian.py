@@ -25,24 +25,26 @@ if args["radius"] is None or args["radius"] <= 0 or args["radius"] % 2 == 0:
 
 image_folder = "dataset/train/converted_images"
 #label_folder = "dataset/train/gauss_labels"  # Folder to save label files
-#bounded_image_folder = "dataset/train/bounded_images"  # Folder to save processed images
+bounded_image_folder = "dataset/train/bounded_images"  # Folder to save processed images
+false_origin_folder = "dataset/train/false_origins"
+
 
 # Ensure that the folders exist
 if not os.path.exists(image_folder):
     print(f"Error: Folder {image_folder} does not exist.")
     exit()
 
-#if not os.path.exists(label_folder):
-#    os.makedirs(label_folder)
+if not os.path.exists(false_origin_folder):
+   os.makedirs(false_origin_folder)
 
-#if not os.path.exists(bounded_image_folder):
-#    os.makedirs(bounded_image_folder)
+if not os.path.exists(bounded_image_folder):
+    os.makedirs(bounded_image_folder)
 
 image_paths = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
 
 # Loop through each image in the folder
 for image_path in image_paths:
-    print(f"Processing image: {image_path}")
+    #print(f"Processing image: {image_path}")
 
     image = cv2.imread(image_path)
     if image is None:
@@ -74,6 +76,34 @@ for image_path in image_paths:
         occupied_positions.add((x, y))
         cv2.rectangle(gray, (x - step, y - step), (x + step, y + step), 0, -1)  # Mask out region
 
+    # Compute the average center of detected bright regions
+    if bright_regions:
+        avg_x = int(np.mean([pt[0] for pt in bright_regions]))
+        avg_y = int(np.mean([pt[1] for pt in bright_regions]))
+    else:
+        print(f"No bright regions detected for {image_path}. Skipping line drawing.")
+        continue
+
+    # Load the false origin coordinates from its corresponding txt file
+    false_origin_file = os.path.join(false_origin_folder, os.path.splitext(os.path.basename(image_path))[0] + ".txt")
+    print(f"Looking for file: " + false_origin_file)
+
+    if not os.path.exists(false_origin_file):
+        #print(f"Warning: No false origin file found for {false_origin_file}. Skipping.")
+        continue
+
+    with open(false_origin_file, "r") as f:
+        try:
+            content = f.readline().strip()
+            print(f"Reading from {false_origin_file}: {content}")  # Debugging output
+            false_origin_x, false_origin_y = map(int, content.split(','))  # Fix: Split by comma
+        except ValueError:
+            print(f"Error: Could not parse '{content}' in {false_origin_file}. Expected two integers separated by a comma.")
+            continue
+
+    # Draw a line from the false origin to the computed average center
+    cv2.line(image, (false_origin_x, false_origin_y), (avg_x, avg_y), (0, 255, 0), 2)
+
     for region in bright_regions:
         top_left = (region[0] - args["radius"], region[1] - args["radius"])
         bottom_right = (region[0] + args["radius"], region[1] + args["radius"])
@@ -93,6 +123,6 @@ for image_path in image_paths:
             norm_height = (height / image_height)
             file.write(f"{class_id} {norm_x_center} {norm_y_center} {norm_width} {norm_height}\n")
     
-    #output_image_path = os.path.join(bounded_image_folder, os.path.splitext(os.path.basename(image_path))[0] + "_processed.jpg")
-    #cv2.imwrite(output_image_path, image)
-    print(f"Saved processed image to {image_folder}")
+    output_image_path = os.path.join(bounded_image_folder, os.path.splitext(os.path.basename(image_path))[0] + "_processed.jpg")
+    cv2.imwrite(output_image_path, image)
+    print(f"Saved processed image to {bounded_image_folder}")

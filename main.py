@@ -8,19 +8,6 @@ from data_loader import data_loader
 
 # cmd for boxes labelImg dataset/train/converted_images (must in each folder have classes.txt)
 
-# Define paths relative to the project root
-project_root = os.path.dirname(os.path.abspath(__file__))
-train_fits_path = os.path.join(project_root, "dataset/train/images")
-train_png_path = os.path.join(project_root, "dataset/train/converted_images")
-train_labels_path = os.path.join(project_root, "dataset/train/labels")
-val_fits_path = os.path.join(project_root, "dataset/val/images")
-val_png_path = os.path.join(project_root, "dataset/val/converted_images")
-val_labels_path = os.path.join(project_root, "dataset/val/labels")
-
-# Convert FITS files to PNG for both training and validation datasets
-data_loader(train_fits_path, train_png_path)
-data_loader(val_fits_path, val_png_path)
-
 # Load a YOLOv8 model
 model = YOLO('yolov8n.pt')  # Replace 'n' with 's', 'm', 'l', or 'x' for larger models
 

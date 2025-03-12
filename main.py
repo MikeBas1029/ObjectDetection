@@ -4,9 +4,6 @@ from ultralytics import YOLO
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import numpy as np
-from data_loader import data_loader
-
-# cmd for boxes labelImg dataset/train/converted_images (must in each folder have classes.txt)
 
 # Load a YOLOv8 model
 model = YOLO('yolov8n.pt')  # Replace 'n' with 's', 'm', 'l', or 'x' for larger models
@@ -19,6 +16,9 @@ model = YOLO('runs/detect/train6/weights/best.pt')
 
 # Predict on a new image
 results = model.predict(source='dataset/train/converted_images/PKR_DASC_0428_20160217_143735.846.png', save=True)
+
+# Check prediction shapes
+print(f"Prediction shapes: {[pred.shape for pred in results.pred]}")
 
 # Load an image
 img = cv2.imread('dataset/train/converted_images/PKR_DASC_0428_20160217_143735.846.png')

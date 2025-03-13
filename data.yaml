@@ -1,0 +1,5 @@
+train: C:\GP\Coding Projects\ObjectDetection\dataset\train\converted_images
+val: C:\GP\Coding Projects\ObjectDetection\dataset\val\converted_images
+
+nc: 2
+names: ["airglow", "artifact"]

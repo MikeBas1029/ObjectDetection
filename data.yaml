@@ -1,5 +1,4 @@
-train: C:\GP\Coding Projects\ObjectDetection\dataset\train\converted_images
-val: C:\GP\Coding Projects\ObjectDetection\dataset\val\converted_images
-
+train: C:/Users/Zeel/spring25/asi/ObjectDetection/dataset/train/converted_images
+val: C:/Users/Zeel/spring25/asi/ObjectDetection/dataset/val/converted_images
 nc: 2
 names: ["airglow", "artifact"]

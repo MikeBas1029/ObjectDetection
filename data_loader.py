@@ -22,11 +22,9 @@ def data_loader(input_dir, output_dir, false_origin_path):
             origin_path = os.path.join(false_origin_path, origin_file)
             
             # Check if the PNG file already exists
-            '''
             if os.path.exists(output_path):
                 print(f"Skipping {fits_file}, {output_file} already exists.")
-                continue'
-            '''
+                continue
             
             fits_path = os.path.join(input_dir, fits_file)
             try:

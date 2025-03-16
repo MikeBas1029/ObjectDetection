@@ -75,6 +75,9 @@ for image_path in image_paths:
 
     # List to store airglow bounding boxes for overlap check
     airglow_bboxes = []
+    
+    # Define a threshold for ignoring detections at the top
+    top_threshold = int(0.15 * height)  # Ignore top 15% of the image
 
     # -----------------------------
     #  AIRGLOW DETECTION (BLUE BOXES)
@@ -94,7 +97,7 @@ for image_path in image_paths:
                     break
 
             # Only detect if significantly brighter than average
-            if maxVal > avg_brightness * 1.2:
+            if maxVal > avg_brightness * 1.2 and y > top_threshold:
                 bright_regions.append((x, y))
                 occupied_positions.add((x, y))
                 cv2.rectangle(blurred_gray, (x - step, y - step), (x + step, y + step), 0, -1)  # Mask detected region
@@ -109,47 +112,36 @@ for image_path in image_paths:
     # -----------------------------
     #  STAR DETECTION (GREEN BOXES)
     # -----------------------------
-    gray_no_blur = cv2.cvtColor(orig, cv2.COLOR_BGR2GRAY)  # Original grayscale image
+    gray_no_blur = cv2.cvtColor(orig, cv2.COLOR_BGR2GRAY)
     laplacian = cv2.Laplacian(gray_no_blur, cv2.CV_64F)
     sharpness_map = cv2.convertScaleAbs(laplacian)
 
-    # Apply circular mask
     masked_sharpness = cv2.bitwise_and(sharpness_map, mask)
 
-    # Increase threshold for better star detection
-    star_threshold = avg_brightness * 3.8
+    star_threshold = avg_brightness * 3.5  # Lowered from 3.8 to 3.5 to detect slightly dimmer stars
     detected_stars = []
 
-    # Detect bright sharp spots (stars)
-    for _ in range(5):  # Detect up to 5 bright spots
+    for _ in range(7):  # Increase detection limit to catch slightly bigger stars
         (minVal, maxVal, minLoc, maxLoc) = cv2.minMaxLoc(masked_sharpness)
         x, y = maxLoc
 
-        # Ensure detection is inside the circular region
         if (x - center[0])**2 + (y - center[1])**2 < radius**2:
             if maxVal > star_threshold:
-                bbox_size = args["radius"] // 3  # Smaller boxes for stars
+                bbox_size = max(args["radius"] // 3, int(maxVal / 100))
                 top_left = (x - bbox_size, y - bbox_size)
                 bottom_right = (x + bbox_size, y + bbox_size)
 
-                # Check if the star bounding box overlaps with any airglow box
                 overlap_found = False
                 for airglow_bbox in airglow_bboxes:
-                    if is_overlap((top_left[0], top_left[1], bbox_size*2, bbox_size*2), airglow_bbox):
+                    if is_overlap((top_left[0], top_left[1], bbox_size * 2, bbox_size * 2), airglow_bbox):
                         overlap_found = True
                         break
 
-                # Only draw green bounding box if no overlap
                 if not overlap_found:
                     detected_stars.append((x, y))
-                    cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2)  # Green for stars
-
-                    # Mask out detected star to prevent repeated detection
+                    cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2)
                     cv2.rectangle(masked_sharpness, top_left, bottom_right, 0, -1)
 
-    # -----------------------------
-    #  SAVE PROCESSED IMAGE
-    # -----------------------------
     output_image_path = os.path.join(bounded_image_folder, os.path.splitext(os.path.basename(image_path))[0] + "_processed.jpg")
     cv2.imwrite(output_image_path, image)
     print(f"Saved processed image to {output_image_path}")

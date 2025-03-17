@@ -5,6 +5,8 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 import numpy as np
 
+# cmd for boxes labelImg dataset/train/converted_images (must in each folder have classes.txt)
+
 # Load a YOLOv8 model
 model = YOLO('yolov8n.pt')  # Replace 'n' with 's', 'm', 'l', or 'x' for larger models
 

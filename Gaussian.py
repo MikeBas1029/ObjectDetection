@@ -24,7 +24,7 @@ if args["radius"] is None or args["radius"] <= 0 or args["radius"] % 2 == 0:
     args["radius"] = 5  # Default radius
 
 # Folder paths
-image_folder = "dataset/train/converted_images/tempfolder"
+image_folder = "dataset/train/converted_images"
 
 # Get image paths
 image_paths = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]

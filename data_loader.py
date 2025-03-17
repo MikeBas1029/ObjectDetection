@@ -42,6 +42,6 @@ def data_loader(input_dir, output_dir):
                 print(f"Error converting {fits_file}: {e}")
 
 if __name__ == "__main__":
-    # Convert FITS files to PNG for both training
+    # Convert FITS files to PNG for both training and validation datasets
     data_loader(train_fits_path, train_png_path)
     #data_loader(val_fits_path, val_png_path)

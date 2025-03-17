@@ -13,10 +13,16 @@ def process_label_file(label_file):
             parts = line.strip().split()
             if len(parts) != 6:
                 continue  # Skip malformed lines
-            _, x, y, w, h, prob = map(float, parts)
+            class_id, x, y, w, h, prob = map(float, parts)
+            
+            # Skip artifacts (class_id == 1), only keep airglow (class_id == 0)
+            if class_id != 0:
+                continue
+            
             centers.append((x, y))
             probabilities.append(prob)
     return np.array(centers), np.array(probabilities)
+
 
 def find_best_interest_direction(centers, probabilities, image_shape, prob_threshold=0.3):
     """ Finds the direction of most airglow regions using a weighted average. """

@@ -14,7 +14,7 @@ output_folder = "dataset/train/test_labels"
 os.makedirs(output_folder, exist_ok=True)
 
 for filename in os.listdir(input_folder):
-    if filename.endswith(".txt"):
+    if filename.endswith(".txt") and filename != "classes.txt":
         input_path = os.path.join(input_folder, filename)
         output_path = os.path.join(output_folder, filename)
         append_random_probabilities(input_path, output_path)

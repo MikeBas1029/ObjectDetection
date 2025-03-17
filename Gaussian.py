@@ -25,12 +25,10 @@ if args["radius"] is None or args["radius"] <= 0 or args["radius"] % 2 == 0:
 
 # Folder paths
 image_folder = "dataset/train/converted_images"
-bounded_image_folder = "dataset/train/bounded_images"
-false_origin_folder = "dataset/train/false_origins"
+#bounded_image_folder = "dataset/train/bounded_images"
 
 # Ensure necessary folders exist
-os.makedirs(false_origin_folder, exist_ok=True)
-os.makedirs(bounded_image_folder, exist_ok=True)
+#os.makedirs(bounded_image_folder, exist_ok=True)
 
 # Get image paths
 image_paths = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
@@ -100,14 +98,14 @@ for image_path in image_paths:
             if maxVal > avg_brightness * 1.2 and y > top_threshold:
                 bright_regions.append((x, y))
                 occupied_positions.add((x, y))
-                cv2.rectangle(blurred_gray, (x - step, y - step), (x + step, y + step), 0, -1)  # Mask detected region
+                #cv2.rectangle(blurred_gray, (x - step, y - step), (x + step, y + step), 0, -1)  # Mask detected region
 
     # Draw bounding boxes for airglow and save the coordinates
     for region in bright_regions:
         top_left = (region[0] - args["radius"], region[1] - args["radius"])
         bottom_right = (region[0] + args["radius"], region[1] + args["radius"])
         airglow_bboxes.append((top_left[0], top_left[1], bottom_right[0] - top_left[0], bottom_right[1] - top_left[1]))
-        cv2.rectangle(image, top_left, bottom_right, (255, 0, 0), 2)  # Blue for airglow
+        #cv2.rectangle(image, top_left, bottom_right, (255, 0, 0), 2)  # Blue for airglow
 
     # -----------------------------
     #  STAR DETECTION (GREEN BOXES)
@@ -139,10 +137,25 @@ for image_path in image_paths:
 
                 if not overlap_found:
                     detected_stars.append((x, y))
-                    cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2)
+                    #cv2.rectangle(image, top_left, bottom_right, (0, 255, 0), 2)
                     cv2.rectangle(masked_sharpness, top_left, bottom_right, 0, -1)
-
-    output_image_path = os.path.join(bounded_image_folder, os.path.splitext(os.path.basename(image_path))[0] + "_processed.jpg")
+    
+    output_txt_path = os.path.splitext(image_path)[0] + ".txt"
+    with open(output_txt_path, "w") as f:
+        for region in airglow_bboxes:
+            x_center = (region[0] + region[2] / 2) / width
+            y_center = (region[1] + region[3] / 2) / height
+            w_norm = region[2] / width
+            h_norm = region[3] / height
+            f.write(f"0 {x_center} {y_center} {w_norm} {h_norm}\n")  # Airglow (0)
+        for star in detected_stars:
+            x_center = star[0] / width
+            y_center = star[1] / height
+            w_norm = (args["radius"] // 3 * 2) / width
+            h_norm = (args["radius"] // 3 * 2) / height
+            f.write(f"1 {x_center} {y_center} {w_norm} {h_norm}\n")  # Star (1)
+    
+    output_image_path = os.path.join(image_folder, os.path.splitext(os.path.basename(image_path))[0] + ".png")
     cv2.imwrite(output_image_path, image)
     print(f"Saved processed image to {output_image_path}")
 
